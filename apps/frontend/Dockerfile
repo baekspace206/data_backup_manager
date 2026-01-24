@@ -11,11 +11,23 @@ ENV PYTHONUNBUFFERED=1
 ENV NODE_ENV=development
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
+# Node 및 npm 버전 확인
+RUN node --version && npm --version
+
 # 패키지 파일들 복사
 COPY package*.json ./
 
-# 의존성 설치
-RUN npm install && npm cache clean --force
+# package.json 내용 확인
+RUN cat package.json
+
+# npm 설정 확인
+RUN npm config list
+
+# 의존성 설치 (단계별 진행)
+RUN npm install --no-optional --verbose || (echo "Install failed, checking logs..." && cat /root/.npm/_logs/* && exit 1)
+
+# 캐시 정리
+RUN npm cache clean --force
 
 # 소스 코드 복사
 COPY . .
