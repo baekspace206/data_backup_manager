@@ -1,5 +1,5 @@
 # 멀티스테이지 빌드를 사용한 Node.js 백엔드
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ COPY src ./src
 RUN npm run build
 
 # 프로덕션 이미지
-FROM node:18-alpine AS production
+FROM node:20-alpine AS production
 
 WORKDIR /app
 

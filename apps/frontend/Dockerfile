@@ -1,5 +1,5 @@
 # 멀티스테이지 빌드를 사용한 React 프론트엔드
-FROM node:18-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
