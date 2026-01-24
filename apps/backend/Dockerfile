@@ -3,13 +3,25 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# 시스템 패키지 업데이트 및 빌드 도구 설치
-RUN apk add --no-cache python3 make g++ libc6-compat && rm -rf /var/cache/apk/*
+# 시스템 패키지 업데이트 및 빌드 도구 설치 (native dependencies용)
+RUN apk add --no-cache \
+    python3 \
+    make \
+    g++ \
+    libc6-compat \
+    vips-dev \
+    pkgconfig \
+    pixman-dev \
+    cairo-dev \
+    pango-dev \
+    && rm -rf /var/cache/apk/*
 
 # 환경 변수 설정
 ENV PYTHONUNBUFFERED=1
 ENV NODE_ENV=development
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
+ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
+ENV npm_config_build_from_source=true
 
 # Node 및 npm 버전 확인
 RUN node --version && npm --version
@@ -24,8 +36,8 @@ RUN cat package.json
 # npm 설정 확인
 RUN npm config list
 
-# 모든 의존성 설치 (dev dependencies 포함)
-RUN npm install --no-optional --verbose || (echo "Install failed, checking logs..." && cat /root/.npm/_logs/* && exit 1)
+# 모든 의존성 설치 (native dependencies 포함)
+RUN npm ci --verbose --no-audit || npm install --verbose --no-audit || (echo "Install failed, checking logs..." && find /root/.npm/_logs -name "*.log" -exec cat {} \; && exit 1)
 
 # 캐시 정리
 RUN npm cache clean --force

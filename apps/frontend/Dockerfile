@@ -23,8 +23,8 @@ RUN cat package.json
 # npm 설정 확인
 RUN npm config list
 
-# 의존성 설치 (단계별 진행)
-RUN npm install --no-optional --verbose || (echo "Install failed, checking logs..." && cat /root/.npm/_logs/* && exit 1)
+# 의존성 설치 (Alpine 환경에 최적화)
+RUN npm ci --verbose --no-audit || npm install --verbose --no-audit || (echo "Install failed, checking logs..." && find /root/.npm/_logs -name "*.log" -exec cat {} \; && exit 1)
 
 # 캐시 정리
 RUN npm cache clean --force
