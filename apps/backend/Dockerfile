@@ -19,7 +19,6 @@ RUN apk add --no-cache \
 ENV PYTHONUNBUFFERED=1
 ENV NODE_ENV=development
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
-ENV SHARP_IGNORE_GLOBAL_LIBVIPS=1
 ENV npm_config_build_from_source=true
 
 # Node 및 npm 버전 확인
