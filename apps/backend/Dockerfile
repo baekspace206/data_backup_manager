@@ -43,14 +43,8 @@ RUN cat package.json
 # npm 설정 확인
 RUN npm config list
 
-# 의존성 설치 (문제 있는 패키지 제외하고 먼저 설치)
-RUN npm install --no-optional --ignore-scripts --verbose --no-audit
-
-# Sharp 별도 설치 (네이티브 바이너리 사용)
-RUN npm install sharp --platform=linux --arch=$TARGETARCH --verbose
-
-# 나머지 스크립트 실행
-RUN npm rebuild --verbose
+# 의존성 설치 (단순한 방법 사용)
+RUN npm install --verbose --no-audit --legacy-peer-deps
 
 # 캐시 정리
 RUN npm cache clean --force
