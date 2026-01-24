@@ -1,6 +1,10 @@
 # 멀티스테이지 빌드를 사용한 Node.js 백엔드
 FROM node:20-alpine AS builder
 
+# 빌드 아키텍처 정보
+ARG TARGETARCH
+ARG TARGETOS
+
 WORKDIR /app
 
 # 시스템 패키지 업데이트 및 빌드 도구 설치 (native dependencies용)
@@ -39,8 +43,14 @@ RUN cat package.json
 # npm 설정 확인
 RUN npm config list
 
-# 모든 의존성 설치 (빌드에 필요한 dev dependencies 포함)
-RUN npm install --verbose --no-audit || (echo "Install failed, checking error logs..." && find /root/.npm/_logs -name "*.log" -exec echo "=== {} ===" \; -exec cat {} \; && exit 1)
+# 의존성 설치 (문제 있는 패키지 제외하고 먼저 설치)
+RUN npm install --no-optional --ignore-scripts --verbose --no-audit
+
+# Sharp 별도 설치 (네이티브 바이너리 사용)
+RUN npm install sharp --platform=linux --arch=$TARGETARCH --verbose
+
+# 나머지 스크립트 실행
+RUN npm rebuild --verbose
 
 # 캐시 정리
 RUN npm cache clean --force

@@ -1,6 +1,10 @@
 # 멀티스테이지 빌드를 사용한 React 프론트엔드
 FROM node:20-alpine AS builder
 
+# 빌드 아키텍처 정보
+ARG TARGETARCH
+ARG TARGETOS
+
 WORKDIR /app
 
 # 시스템 패키지 업데이트
