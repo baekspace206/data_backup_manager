@@ -7,20 +7,12 @@ ARG TARGETOS
 
 WORKDIR /app
 
-# 시스템 패키지 업데이트 및 빌드 도구 설치 (native dependencies용)
+# PostgreSQL 클라이언트와 최소한의 빌드 도구만 설치
 RUN apk add --no-cache \
     python3 \
     make \
     g++ \
-    gcc \
-    libc6-compat \
-    vips-dev \
-    pkgconfig \
-    pixman-dev \
-    cairo-dev \
-    pango-dev \
-    glib-dev \
-    expat-dev \
+    postgresql-dev \
     && rm -rf /var/cache/apk/*
 
 # 환경 변수 설정
@@ -43,8 +35,8 @@ RUN cat package.json
 # npm 설정 확인
 RUN npm config list
 
-# 의존성 설치 (단순한 방법 사용)
-RUN npm install --verbose --no-audit --legacy-peer-deps
+# 의존성 설치 (최소한의 패키지로)
+RUN npm install --no-optional --verbose
 
 # 캐시 정리
 RUN npm cache clean --force
