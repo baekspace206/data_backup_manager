@@ -37,7 +37,7 @@ RUN cat package.json
 RUN npm config list
 
 # 모든 의존성 설치 (native dependencies 포함)
-RUN npm ci --verbose --no-audit || npm install --verbose --no-audit || (echo "Install failed, checking logs..." && find /root/.npm/_logs -name "*.log" -exec cat {} \; && exit 1)
+RUN npm install --verbose --no-audit --build-from-source
 
 # 캐시 정리
 RUN npm cache clean --force
