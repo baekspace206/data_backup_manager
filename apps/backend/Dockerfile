@@ -9,16 +9,14 @@ RUN apk add --no-cache python3 make g++ libc6-compat && rm -rf /var/cache/apk/*
 # 환경 변수 설정
 ENV PYTHONUNBUFFERED=1
 ENV NODE_ENV=development
+ENV NPM_CONFIG_UPDATE_NOTIFIER=false
 
 # 패키지 파일들 복사
 COPY package*.json ./
 COPY tsconfig*.json ./
 
-# npm 설정
-RUN npm config set unsafe-perm true
-
 # 모든 의존성 설치 (dev dependencies 포함)
-RUN npm install --verbose && npm cache clean --force
+RUN npm install && npm cache clean --force
 
 # 소스 코드 복사
 COPY src ./src
