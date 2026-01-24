@@ -3,6 +3,9 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# 시스템 패키지 업데이트
+RUN apk add --no-cache python3 make g++ && rm -rf /var/cache/apk/*
+
 # 패키지 파일들 복사
 COPY package*.json ./
 
@@ -17,6 +20,9 @@ RUN npm run build
 
 # Nginx를 사용한 프로덕션 이미지
 FROM nginx:alpine AS production
+
+# curl 설치 (헬스체크용)
+RUN apk add --no-cache curl && rm -rf /var/cache/apk/*
 
 # Nginx 설정 파일 복사
 COPY nginx.conf /etc/nginx/conf.d/default.conf

@@ -3,12 +3,15 @@ FROM node:18-alpine AS builder
 
 WORKDIR /app
 
+# 시스템 패키지 업데이트 및 빌드 도구 설치
+RUN apk add --no-cache python3 make g++ && rm -rf /var/cache/apk/*
+
 # 패키지 파일들 복사
 COPY package*.json ./
 COPY tsconfig*.json ./
 
-# 의존성 설치
-RUN npm ci --only=production && npm cache clean --force
+# 모든 의존성 설치 (dev dependencies 포함)
+RUN npm ci && npm cache clean --force
 
 # 소스 코드 복사
 COPY src ./src
