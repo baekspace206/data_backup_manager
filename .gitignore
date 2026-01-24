@@ -15,8 +15,10 @@ build/
 .env.test.local
 .env.production.local
 
-# Storage data
-storage/
+# Storage data (exclude source code)
+/storage/
+apps/backend/storage/
+apps/frontend/storage/
 
 # IDE
 .vscode/
