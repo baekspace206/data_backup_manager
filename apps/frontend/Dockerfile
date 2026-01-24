@@ -4,13 +4,20 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 
 # 시스템 패키지 업데이트
-RUN apk add --no-cache python3 make g++ && rm -rf /var/cache/apk/*
+RUN apk add --no-cache python3 make g++ libc6-compat && rm -rf /var/cache/apk/*
+
+# 환경 변수 설정
+ENV PYTHONUNBUFFERED=1
+ENV NODE_ENV=development
 
 # 패키지 파일들 복사
 COPY package*.json ./
 
+# npm 설정
+RUN npm config set unsafe-perm true
+
 # 의존성 설치
-RUN npm install && npm cache clean --force
+RUN npm install --verbose && npm cache clean --force
 
 # 소스 코드 복사
 COPY . .
