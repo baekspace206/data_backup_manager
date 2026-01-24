@@ -1,0 +1,143 @@
+.file-upload {
+  margin-bottom: 2rem;
+}
+
+.upload-zone {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 3rem 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: #fafafa;
+}
+
+.upload-zone:hover {
+  border-color: #007bff;
+  background-color: #f0f8ff;
+}
+
+.upload-zone.drag-over {
+  border-color: #007bff;
+  background-color: #e6f3ff;
+  transform: scale(1.02);
+}
+
+.upload-zone.uploading {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.upload-content h3 {
+  margin: 1rem 0 0.5rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.upload-content p {
+  margin: 0.25rem 0;
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.upload-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.uploading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #007bff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.upload-progress-list {
+  margin-top: 1rem;
+  padding: 1rem;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #dee2e6;
+}
+
+.upload-progress-item {
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background-color: white;
+  border-radius: 6px;
+  border: 1px solid #e9ecef;
+}
+
+.upload-progress-item:last-child {
+  margin-bottom: 0;
+}
+
+.file-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.file-name {
+  font-weight: 500;
+  color: #333;
+  max-width: 70%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.status.success {
+  color: #28a745;
+}
+
+.status.error {
+  color: #dc3545;
+}
+
+.status.uploading {
+  color: #007bff;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 4px;
+  background-color: #e9ecef;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background-color: #007bff;
+  transition: width 0.3s ease;
+}
+
+.error-message {
+  font-size: 0.8rem;
+  color: #dc3545;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background-color: #f8d7da;
+  border-radius: 4px;
+}

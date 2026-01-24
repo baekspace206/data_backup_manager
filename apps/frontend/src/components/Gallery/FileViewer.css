@@ -1,0 +1,172 @@
+.file-viewer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.file-viewer {
+  background: white;
+  border-radius: 8px;
+  max-width: 90vw;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.viewer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+  background: #f8f9fa;
+}
+
+.file-info h3 {
+  margin: 0 0 0.5rem 0;
+  color: #333;
+  font-size: 1.1rem;
+}
+
+.file-details {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #666;
+  align-items: center;
+}
+
+.viewer-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.action-btn.delete {
+  color: #dc3545;
+}
+
+.viewer-content {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 400px;
+  background: #000;
+}
+
+.media-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.viewer-image {
+  max-width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+}
+
+.viewer-video {
+  max-width: 100%;
+  max-height: 70vh;
+  outline: none;
+}
+
+.nav-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 2rem;
+  padding: 1rem;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  z-index: 10;
+}
+
+.nav-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.nav-btn.prev {
+  left: 1rem;
+}
+
+.nav-btn.next {
+  right: 1rem;
+}
+
+.viewer-footer {
+  padding: 0.75rem 1.5rem;
+  background: #f8f9fa;
+  border-top: 1px solid #dee2e6;
+}
+
+.keyboard-hints {
+  display: flex;
+  gap: 1rem;
+  font-size: 0.8rem;
+  color: #666;
+  justify-content: center;
+}
+
+@media (max-width: 768px) {
+  .file-viewer-overlay {
+    padding: 1rem;
+  }
+  
+  .viewer-header {
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+  }
+  
+  .file-info {
+    text-align: center;
+  }
+  
+  .viewer-actions {
+    justify-content: center;
+  }
+  
+  .nav-btn {
+    font-size: 1.5rem;
+    padding: 0.75rem;
+  }
+  
+  .keyboard-hints {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
