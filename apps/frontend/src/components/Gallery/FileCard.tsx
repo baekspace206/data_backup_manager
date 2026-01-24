@@ -7,9 +7,10 @@ interface FileCardProps {
   file: FileMetadata;
   onClick: () => void;
   onDelete: () => void;
+  viewMode?: 'grid' | 'list';
 }
 
-export const FileCard: React.FC<FileCardProps> = ({ file, onClick, onDelete }) => {
+export const FileCard: React.FC<FileCardProps> = ({ file, onClick, onDelete, viewMode = 'grid' }) => {
   const [imageError, setImageError] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -30,6 +31,45 @@ export const FileCard: React.FC<FileCardProps> = ({ file, onClick, onDelete }) =
     e.stopPropagation();
   };
 
+  if (viewMode === 'list') {
+    return (
+      <div className="file-card file-card-list" onClick={onClick}>
+        <div className="list-col-name">
+          <div className="file-icon-small">
+            {file.fileType === 'image' ? '🖼️' : '🎬'}
+          </div>
+          <span className="file-name-list" title={file.originalName}>
+            {file.originalName}
+          </span>
+        </div>
+        <div className="list-col-date">
+          {ApiService.formatDate(file.uploadedAt)}
+        </div>
+        <div className="list-col-size">
+          {ApiService.formatFileSize(file.size)}
+        </div>
+        <div className="list-col-actions" onClick={stopPropagation}>
+          <button
+            className="action-btn menu-btn"
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            ⋮
+          </button>
+          {showMenu && (
+            <div className="action-menu">
+              <button onClick={handleDownload} className="menu-item">
+                💾 다운로드
+              </button>
+              <button onClick={onDelete} className="menu-item delete">
+                🗑️ 삭제
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="file-card" onClick={onClick}>
       <div className="file-preview">
@@ -45,14 +85,14 @@ export const FileCard: React.FC<FileCardProps> = ({ file, onClick, onDelete }) =
             {file.fileType === 'image' ? '🖼️' : '🎬'}
           </div>
         )}
-        
+
         <div className="file-overlay">
           <div className="file-type-badge">
             {file.fileType === 'image' ? 'IMG' : 'VID'}
           </div>
         </div>
       </div>
-      
+
       <div className="file-info">
         <div className="file-name" title={file.originalName}>
           {file.originalName}
@@ -66,15 +106,15 @@ export const FileCard: React.FC<FileCardProps> = ({ file, onClick, onDelete }) =
           </span>
         </div>
       </div>
-      
+
       <div className="file-actions" onClick={stopPropagation}>
-        <button 
+        <button
           className="action-btn menu-btn"
           onClick={() => setShowMenu(!showMenu)}
         >
           ⋮
         </button>
-        
+
         {showMenu && (
           <div className="action-menu">
             <button onClick={handleDownload} className="menu-item">

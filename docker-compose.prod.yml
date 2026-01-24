@@ -1,0 +1,77 @@
+version: '3.8'
+
+services:
+  # PostgreSQL 데이터베이스
+  postgres:
+    image: postgres:15-alpine
+    container_name: savemydata_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: savemydata
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --locale=C"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - savemydata_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # 백엔드 API 서버
+  backend:
+    build:
+      context: ./apps/backend
+      dockerfile: Dockerfile
+    container_name: savemydata_backend
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_TYPE=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_DATABASE=savemydata
+      - DB_SYNCHRONIZE=true
+      - DB_LOGGING=false
+      - STORAGE_PATH=/app/storage
+      - MAX_FILE_SIZE=524288000
+      - MAX_FILES_PER_REQUEST=10
+      - LOG_LEVEL=info
+    volumes:
+      - storage_data:/app/storage
+    networks:
+      - savemydata_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 프론트엔드 웹서버 (Nginx + React)
+  frontend:
+    build:
+      context: ./apps/frontend
+      dockerfile: Dockerfile
+    container_name: savemydata_frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    networks:
+      - savemydata_network
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+    driver: local
+  storage_data:
+    driver: local
+
+networks:
+  savemydata_network:
+    driver: bridge

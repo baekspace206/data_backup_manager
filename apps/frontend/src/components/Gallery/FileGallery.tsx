@@ -7,17 +7,23 @@ import './FileGallery.css';
 
 interface FileGalleryProps {
   refreshTrigger?: number;
+  viewMode?: 'grid' | 'list';
+  filterType?: 'image' | 'video';
 }
 
-export const FileGallery: React.FC<FileGalleryProps> = ({ refreshTrigger }) => {
+export const FileGallery: React.FC<FileGalleryProps> = ({ refreshTrigger, viewMode = 'grid', filterType }) => {
   const [files, setFiles] = useState<FileMetadata[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<FileMetadata | null>(null);
   const [filters, setFilters] = useState({
-    fileType: undefined as 'image' | 'video' | undefined,
+    fileType: filterType as 'image' | 'video' | undefined,
     sortBy: 'newest' as 'newest' | 'oldest' | 'name' | 'size'
   });
+
+  useEffect(() => {
+    setFilters(prev => ({ ...prev, fileType: filterType }));
+  }, [filterType]);
 
   const loadFiles = async () => {
     try {
@@ -160,21 +166,42 @@ export const FileGallery: React.FC<FileGalleryProps> = ({ refreshTrigger }) => {
         </div>
       ) : (
         <div className="gallery-content">
-          {groupDates.map(date => (
-            <div key={date} className="date-group">
-              <h3 className="date-header">{date}</h3>
-              <div className="file-grid">
-                {fileGroups[date].map(file => (
-                  <FileCard
-                    key={file.id}
-                    file={file}
-                    onClick={() => setSelectedFile(file)}
-                    onDelete={() => handleDeleteFile(file.id)}
-                  />
-                ))}
+          {viewMode === 'grid' ? (
+            groupDates.map(date => (
+              <div key={date} className="date-group">
+                <h3 className="date-header">{date}</h3>
+                <div className="file-grid">
+                  {fileGroups[date].map(file => (
+                    <FileCard
+                      key={file.id}
+                      file={file}
+                      onClick={() => setSelectedFile(file)}
+                      onDelete={() => handleDeleteFile(file.id)}
+                      viewMode="grid"
+                    />
+                  ))}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="file-list">
+              <div className="list-header">
+                <div className="list-col-name">이름</div>
+                <div className="list-col-date">수정일</div>
+                <div className="list-col-size">크기</div>
+                <div className="list-col-actions"></div>
+              </div>
+              {files.map(file => (
+                <FileCard
+                  key={file.id}
+                  file={file}
+                  onClick={() => setSelectedFile(file)}
+                  onDelete={() => handleDeleteFile(file.id)}
+                  viewMode="list"
+                />
+              ))}
             </div>
-          ))}
+          )}
         </div>
       )}
 

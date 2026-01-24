@@ -8,6 +8,8 @@ import './App.css';
 function App() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [stats, setStats] = useState<FileStats | null>(null);
+  const [currentView, setCurrentView] = useState<'home' | 'recent' | 'images' | 'videos'>('home');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const handleUploadComplete = () => {
     setRefreshTrigger(prev => prev + 1);
@@ -29,47 +31,129 @@ function App() {
 
   return (
     <div className="app">
+      {/* Modern Header */}
       <header className="app-header">
-        <div className="header-content">
-          <h1>💾 SaveMyData</h1>
-          <p>개인용 홈 클라우드 - 사진과 비디오를 안전하게 백업하세요</p>
-          
-          {stats && (
-            <div className="header-stats">
-              <div className="stat-item">
-                <span className="stat-value">{stats.totalFiles}</span>
-                <span className="stat-label">파일</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{ApiService.formatFileSize(stats.totalSize)}</span>
-                <span className="stat-label">용량</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{stats.imageCount}</span>
-                <span className="stat-label">이미지</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-value">{stats.videoCount}</span>
-                <span className="stat-label">비디오</span>
-              </div>
-            </div>
-          )}
+        <div className="header-left">
+          <div className="logo">
+            <span className="logo-icon">☁️</span>
+            <span className="logo-text">SaveMyData</span>
+          </div>
+        </div>
+
+        <div className="header-center">
+          <div className="search-bar">
+            <span className="search-icon">🔍</span>
+            <input type="text" placeholder="파일 검색..." />
+          </div>
+        </div>
+
+        <div className="header-right">
+          <div className="view-controls">
+            <button
+              className={`view-btn ${viewMode === 'grid' ? 'active' : ''}`}
+              onClick={() => setViewMode('grid')}
+            >
+              ⊞
+            </button>
+            <button
+              className={`view-btn ${viewMode === 'list' ? 'active' : ''}`}
+              onClick={() => setViewMode('list')}
+            >
+              ☰
+            </button>
+          </div>
+          <button className="upload-btn">+ 업로드</button>
         </div>
       </header>
 
-      <main className="app-main">
-        <section className="upload-section">
-          <FileUpload onUploadComplete={handleUploadComplete} />
-        </section>
+      <div className="app-body">
+        {/* Sidebar Navigation */}
+        <aside className="sidebar">
+          <nav className="sidebar-nav">
+            <button
+              className={`nav-item ${currentView === 'home' ? 'active' : ''}`}
+              onClick={() => setCurrentView('home')}
+            >
+              <span className="nav-icon">🏠</span>
+              <span className="nav-text">내 드라이브</span>
+            </button>
+            <button
+              className={`nav-item ${currentView === 'recent' ? 'active' : ''}`}
+              onClick={() => setCurrentView('recent')}
+            >
+              <span className="nav-icon">🕒</span>
+              <span className="nav-text">최근 항목</span>
+            </button>
+            <button
+              className={`nav-item ${currentView === 'images' ? 'active' : ''}`}
+              onClick={() => setCurrentView('images')}
+            >
+              <span className="nav-icon">🖼️</span>
+              <span className="nav-text">이미지</span>
+            </button>
+            <button
+              className={`nav-item ${currentView === 'videos' ? 'active' : ''}`}
+              onClick={() => setCurrentView('videos')}
+            >
+              <span className="nav-icon">🎬</span>
+              <span className="nav-text">동영상</span>
+            </button>
+          </nav>
 
-        <section className="gallery-section">
-          <FileGallery refreshTrigger={refreshTrigger} />
-        </section>
-      </main>
+          {stats && (
+            <div className="storage-info">
+              <div className="storage-header">저장용량</div>
+              <div className="storage-usage">
+                <div className="usage-bar">
+                  <div className="usage-fill" style={{ width: '35%' }}></div>
+                </div>
+                <div className="usage-text">
+                  {ApiService.formatFileSize(stats.totalSize)} / 100GB 사용됨
+                </div>
+              </div>
+              <div className="storage-details">
+                <div className="detail-item">
+                  <span className="detail-label">📁 파일 {stats.totalFiles}개</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">🖼️ 이미지 {stats.imageCount}개</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">🎬 동영상 {stats.videoCount}개</span>
+                </div>
+              </div>
+            </div>
+          )}
+        </aside>
 
-      <footer className="app-footer">
-        <p>SaveMyData v1.0 - 개인용 백업 솔루션</p>
-      </footer>
+        {/* Main Content */}
+        <main className="main-content">
+          <div className="content-header">
+            <h1 className="page-title">
+              {currentView === 'home' && '내 드라이브'}
+              {currentView === 'recent' && '최근 항목'}
+              {currentView === 'images' && '이미지'}
+              {currentView === 'videos' && '동영상'}
+            </h1>
+          </div>
+
+          <div className="upload-section">
+            <FileUpload onUploadComplete={handleUploadComplete} />
+          </div>
+
+          <div className="gallery-section">
+            <FileGallery
+              refreshTrigger={refreshTrigger}
+              viewMode={viewMode}
+              filterType={
+                currentView === 'images' ? 'image' :
+                currentView === 'videos' ? 'video' :
+                undefined
+              }
+            />
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

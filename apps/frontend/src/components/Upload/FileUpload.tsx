@@ -133,9 +133,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
   };
 
   return (
-    <div className="file-upload">
+    <div className="file-upload-modern">
       <div
-        className={`upload-zone ${isDragOver ? 'drag-over' : ''} ${isUploading ? 'uploading' : ''}`}
+        className={`upload-zone-compact ${isDragOver ? 'drag-over' : ''} ${isUploading ? 'uploading' : ''}`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
         onDrop={handleDrop}
@@ -149,48 +149,50 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
           accept={acceptedTypes.join(',')}
           style={{ display: 'none' }}
         />
-        
-        <div className="upload-content">
+
+        <div className="upload-content-compact">
           {isUploading ? (
-            <div className="uploading-state">
-              <div className="spinner" />
-              <h3>업로드 중...</h3>
+            <div className="uploading-state-compact">
+              <div className="spinner-small" />
+              <span>업로드 중...</span>
             </div>
           ) : (
-            <div className="idle-state">
-              <div className="upload-icon">📁</div>
-              <h3>파일을 여기에 드래그하거나 클릭하세요</h3>
-              <p>이미지 및 비디오 파일 (최대 500MB)</p>
-              <p>지원 형식: JPG, PNG, GIF, WebP, HEIC, MP4, MOV, AVI</p>
+            <div className="idle-state-compact">
+              <span className="upload-icon-small">☁️</span>
+              <span className="upload-text">파일을 드래그하거나 클릭하여 업로드</span>
+              <span className="upload-hint">이미지, 비디오 (500MB 이하)</span>
             </div>
           )}
         </div>
       </div>
 
       {Object.keys(uploadProgresses).length > 0 && (
-        <div className="upload-progress-list">
+        <div className="upload-progress-modern">
           {Object.values(uploadProgresses).map(progress => (
-            <div key={progress.fileId} className="upload-progress-item">
-              <div className="file-info">
-                <span className="file-name">{progress.fileName}</span>
-                <span className={`status ${progress.status}`}>
+            <div key={progress.fileId} className="upload-item">
+              <div className="upload-item-info">
+                <div className="upload-item-icon">
                   {progress.status === 'success' && '✅'}
                   {progress.status === 'error' && '❌'}
-                  {progress.status === 'uploading' && `${progress.progress}%`}
-                </span>
+                  {progress.status === 'uploading' && '📄'}
+                </div>
+                <div className="upload-item-details">
+                  <div className="upload-item-name">{progress.fileName}</div>
+                  <div className="upload-item-status">
+                    {progress.status === 'success' && '업로드 완료'}
+                    {progress.status === 'error' && progress.error}
+                    {progress.status === 'uploading' && `${progress.progress}% 업로드 중`}
+                  </div>
+                </div>
               </div>
-              
+
               {progress.status === 'uploading' && (
-                <div className="progress-bar">
-                  <div 
-                    className="progress-fill" 
+                <div className="upload-progress-bar">
+                  <div
+                    className="upload-progress-fill"
                     style={{ width: `${progress.progress}%` }}
                   />
                 </div>
-              )}
-              
-              {progress.error && (
-                <div className="error-message">{progress.error}</div>
               )}
             </div>
           ))}

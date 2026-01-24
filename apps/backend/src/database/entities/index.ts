@@ -1,0 +1,1 @@
+export { FileMetadataEntity } from './file-metadata.entity';
