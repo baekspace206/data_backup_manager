@@ -8,12 +8,15 @@ RUN apk add --no-cache \
     python3 \
     make \
     g++ \
+    gcc \
     libc6-compat \
     vips-dev \
     pkgconfig \
     pixman-dev \
     cairo-dev \
     pango-dev \
+    glib-dev \
+    expat-dev \
     && rm -rf /var/cache/apk/*
 
 # 환경 변수 설정
@@ -36,8 +39,8 @@ RUN cat package.json
 # npm 설정 확인
 RUN npm config list
 
-# 모든 의존성 설치 (native dependencies 포함)
-RUN npm install --verbose --no-audit --build-from-source
+# 모든 의존성 설치 (빌드에 필요한 dev dependencies 포함)
+RUN npm install --verbose --no-audit || (echo "Install failed, checking error logs..." && find /root/.npm/_logs -name "*.log" -exec echo "=== {} ===" \; -exec cat {} \; && exit 1)
 
 # 캐시 정리
 RUN npm cache clean --force
