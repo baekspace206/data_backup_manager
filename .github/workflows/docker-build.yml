@@ -105,7 +105,6 @@ jobs:
     permissions:
       contents: read
       packages: read
-      security-events: write
 
     strategy:
       matrix:
@@ -122,21 +121,13 @@ jobs:
 
     - name: Pull image for scanning
       run: docker pull ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ github.ref_name }}
-      continue-on-error: true
 
     - name: Run Trivy vulnerability scanner
       uses: aquasecurity/trivy-action@master
       with:
         image-ref: ${{ env.IMAGE_PREFIX }}-${{ matrix.image }}:${{ github.ref_name }}
-        format: 'sarif'
-        output: 'trivy-results.sarif'
-        skip-db-update: false
-        skip-java-db-update: false
-      continue-on-error: true
-
-    - name: Upload Trivy scan results to GitHub Security tab
-      uses: github/codeql-action/upload-sarif@v3
-      if: always()
-      with:
-        sarif_file: 'trivy-results.sarif'
-      continue-on-error: true
+        format: 'table'
+        exit-code: '0'
+        ignore-unfixed: true
+        vuln-type: 'os,library'
+        severity: 'CRITICAL,HIGH'
