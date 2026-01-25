@@ -41,13 +41,15 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
 
   const uploadFiles = useCallback(async (files: File[]) => {
     if (files.length === 0) return;
-    
+
     setIsUploading(true);
-    
+
     // 각 파일별로 진행률 초기화
+    const fileIds: string[] = [];
     const initialProgresses: Record<string, UploadProgress> = {};
     files.forEach((file, index) => {
       const fileId = `${Date.now()}-${index}`;
+      fileIds.push(fileId);
       initialProgresses[fileId] = {
         fileId,
         fileName: file.name,
@@ -58,45 +60,58 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onUploadComplete }) => {
     setUploadProgresses(initialProgresses);
 
     try {
-      // 전체 진행률 추적
-      let totalProgress = 0;
+      // 진행률 업데이트 콜백 - 실시간으로 상태 반영
       const updateProgress = (progress: number) => {
-        totalProgress = progress;
+        setUploadProgresses(prev => {
+          const updated: Record<string, UploadProgress> = {};
+          Object.keys(prev).forEach(fileId => {
+            updated[fileId] = {
+              ...prev[fileId],
+              progress: progress,
+              status: 'uploading'
+            };
+          });
+          return updated;
+        });
       };
 
       await ApiService.uploadFiles(files, updateProgress);
-      
+
       // 모든 파일 업로드 완료
-      const completedProgresses: Record<string, UploadProgress> = {};
-      Object.keys(initialProgresses).forEach(fileId => {
-        completedProgresses[fileId] = {
-          ...initialProgresses[fileId],
-          progress: 100,
-          status: 'success'
-        };
+      setUploadProgresses(prev => {
+        const completed: Record<string, UploadProgress> = {};
+        Object.keys(prev).forEach(fileId => {
+          completed[fileId] = {
+            ...prev[fileId],
+            progress: 100,
+            status: 'success'
+          };
+        });
+        return completed;
       });
-      setUploadProgresses(completedProgresses);
-      
+
       onUploadComplete?.();
-      
+
       // 3초 후 진행률 표시 제거
       setTimeout(() => {
         setUploadProgresses({});
       }, 3000);
-      
+
     } catch (error) {
       console.error('Upload failed:', error);
-      
+
       // 에러 상태로 업데이트
-      const errorProgresses: Record<string, UploadProgress> = {};
-      Object.keys(initialProgresses).forEach(fileId => {
-        errorProgresses[fileId] = {
-          ...initialProgresses[fileId],
-          status: 'error',
-          error: error instanceof Error ? error.message : '업로드 실패'
-        };
+      setUploadProgresses(prev => {
+        const errorProgresses: Record<string, UploadProgress> = {};
+        Object.keys(prev).forEach(fileId => {
+          errorProgresses[fileId] = {
+            ...prev[fileId],
+            status: 'error',
+            error: error instanceof Error ? error.message : '업로드 실패'
+          };
+        });
+        return errorProgresses;
       });
-      setUploadProgresses(errorProgresses);
     } finally {
       setIsUploading(false);
     }
