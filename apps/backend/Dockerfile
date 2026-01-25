@@ -1,10 +1,6 @@
 # 멀티스테이지 빌드를 사용한 Node.js 백엔드
 FROM node:20-alpine AS builder
 
-# 빌드 아키텍처 정보
-ARG TARGETARCH
-ARG TARGETOS
-
 WORKDIR /app
 
 # PostgreSQL 클라이언트와 최소한의 빌드 도구만 설치
@@ -19,32 +15,22 @@ RUN apk add --no-cache \
 ENV PYTHONUNBUFFERED=1
 ENV NODE_ENV=development
 ENV NPM_CONFIG_UPDATE_NOTIFIER=false
-ENV npm_config_build_from_source=true
-
-# Node 및 npm 버전 확인
-RUN node --version && npm --version
 
 # 패키지 파일들 복사
 COPY package*.json ./
 COPY tsconfig*.json ./
 
-# package.json 내용 확인
-RUN cat package.json
-
-# npm 설정 확인
-RUN npm config list
-
-# 의존성 설치 (최소한의 패키지로)
-RUN npm install --no-optional --verbose
-
-# 캐시 정리
-RUN npm cache clean --force
+# 의존성 설치
+RUN npm install --no-optional
 
 # 소스 코드 복사
 COPY src ./src
 
 # TypeScript 빌드
 RUN npm run build
+
+# devDependencies 제거하여 프로덕션 node_modules 생성
+RUN npm prune --production
 
 # 프로덕션 이미지
 FROM node:20-alpine AS production
@@ -57,14 +43,10 @@ RUN apk add --no-cache \
     curl \
     && rm -rf /var/cache/apk/*
 
-# 패키지 파일들 복사
-COPY package*.json ./
-
-# 프로덕션 의존성만 설치
-RUN npm install --only=production && npm cache clean --force
-
-# 빌드된 파일들 복사
+# 빌드 스테이지에서 프로덕션 node_modules 복사 (npm install 재실행 방지)
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
 
 # 저장소 디렉터리 생성
 RUN mkdir -p /app/storage
@@ -77,4 +59,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3001/health || exit 1
 
 # 애플리케이션 실행
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/main.js"]
