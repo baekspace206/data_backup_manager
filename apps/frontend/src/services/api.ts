@@ -1,6 +1,12 @@
 import { FileMetadata, FileListResponse, FileStats } from '../types/file';
 
-const API_BASE = 'http://localhost:3001/api';
+// 현재 호스트 기반으로 API URL 동적 생성
+const getApiBase = (): string => {
+  const hostname = window.location.hostname;
+  return `http://${hostname}:3001/api`;
+};
+
+const API_BASE = getApiBase();
 
 export class ApiService {
   static async uploadFiles(
