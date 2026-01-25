@@ -1,12 +1,7 @@
 import { FileMetadata, FileListResponse, FileStats } from '../types/file';
 
-// 현재 호스트 기반으로 API URL 동적 생성
-const getApiBase = (): string => {
-  const hostname = window.location.hostname;
-  return `http://${hostname}:3001/api`;
-};
-
-const API_BASE = getApiBase();
+// nginx 리버스프록시를 통한 상대 경로 사용 (CORS 해결)
+const API_BASE = '/api';
 
 export class ApiService {
   static async uploadFiles(
