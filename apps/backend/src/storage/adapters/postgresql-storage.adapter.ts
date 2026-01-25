@@ -7,7 +7,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-// import * as sharp from 'sharp'; // Temporarily disabled for build compatibility
+import * as sharp from 'sharp';
 
 @Injectable()
 export class PostgreSQLStorageAdapter implements StorageAdapter {
@@ -50,16 +50,15 @@ export class PostgreSQLStorageAdapter implements StorageAdapter {
     // 파일 타입 결정
     const fileType = file.mimetype.startsWith('image/') ? 'image' : 'video';
 
-    // 썸네일 생성 (이미지인 경우) - 임시로 비활성화
+    // 썸네일 생성 (이미지인 경우)
     let thumbnailPath: string | undefined;
-    // Temporarily disabled due to Sharp compilation issues
-    // if (fileType === 'image') {
-    //   try {
-    //     thumbnailPath = await this.createThumbnail(file.buffer, fileId);
-    //   } catch (error) {
-    //     console.warn('Failed to create thumbnail:', error);
-    //   }
-    // }
+    if (fileType === 'image') {
+      try {
+        thumbnailPath = await this.createThumbnail(file.buffer, fileId);
+      } catch (error) {
+        console.warn('Failed to create thumbnail:', error);
+      }
+    }
 
     // 데이터베이스에 메타데이터 저장
     const fileMetadataEntity = this.fileMetadataRepository.create({
@@ -189,19 +188,18 @@ export class PostgreSQLStorageAdapter implements StorageAdapter {
       return fs.readFile(thumbnailFullPath);
     }
 
-    // 썸네일이 없으면 원본에서 생성 - 임시로 비활성화
-    // Temporarily disabled due to Sharp compilation issues
-    // if (entity.fileType === 'image') {
-    //   const fileBuffer = await this.getFile(id);
-    //   return sharp(fileBuffer)
-    //     .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
-    //       fit: 'cover'
-    //     })
-    //     .jpeg({ quality: 80 })
-    //     .toBuffer();
-    // }
+    // 썸네일이 없으면 원본에서 생성
+    if (entity.fileType === 'image') {
+      const fileBuffer = await this.getFile(id);
+      return sharp(fileBuffer)
+        .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
+          fit: 'cover'
+        })
+        .jpeg({ quality: 80 })
+        .toBuffer();
+    }
 
-    throw new Error('Thumbnail generation temporarily disabled');
+    throw new Error('Thumbnail not available for this file type');
   }
 
   async getStorageInfo(): Promise<{
@@ -244,22 +242,21 @@ export class PostgreSQLStorageAdapter implements StorageAdapter {
     return this.entityToMetadata(entity);
   }
 
-  // Temporarily disabled due to Sharp compilation issues
-  // private async createThumbnail(buffer: Buffer, fileId: string): Promise<string> {
-  //   const thumbnailBuffer = await sharp(buffer)
-  //     .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
-  //       fit: 'cover'
-  //     })
-  //     .jpeg({ quality: 80 })
-  //     .toBuffer();
+  private async createThumbnail(buffer: Buffer, fileId: string): Promise<string> {
+    const thumbnailBuffer = await sharp(buffer)
+      .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
+        fit: 'cover'
+      })
+      .jpeg({ quality: 80 })
+      .toBuffer();
 
-  //   const thumbnailPath = path.join('thumbnails', `${fileId}.jpg`);
-  //   const fullThumbnailPath = path.join(this.config.basePath, thumbnailPath);
+    const thumbnailPath = path.join('thumbnails', `${fileId}.jpg`);
+    const fullThumbnailPath = path.join(this.config.basePath, thumbnailPath);
 
-  //   await fs.writeFile(fullThumbnailPath, thumbnailBuffer);
+    await fs.writeFile(fullThumbnailPath, thumbnailBuffer);
 
-  //   return thumbnailPath;
-  // }
+    return thumbnailPath;
+  }
 
   private getDatePath(date: Date): string {
     const year = date.getFullYear();

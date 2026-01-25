@@ -4,7 +4,7 @@ import * as fs from 'fs/promises';
 import * as path from 'path';
 import * as crypto from 'crypto';
 import { v4 as uuidv4 } from 'uuid';
-// import * as sharp from 'sharp'; // Temporarily disabled for build compatibility
+import * as sharp from 'sharp';
 
 @Injectable()
 export class LocalStorageAdapter implements StorageAdapter {
@@ -55,16 +55,15 @@ export class LocalStorageAdapter implements StorageAdapter {
       checksum
     };
 
-    // 썸네일 생성 (이미지인 경우) - 임시로 비활성화
-    // Temporarily disabled due to Sharp compilation issues
-    // if (fileType === 'image') {
-    //   try {
-    //     const thumbnailPath = await this.createThumbnail(file.buffer, fileId);
-    //     metadata.thumbnailPath = thumbnailPath;
-    //   } catch (error) {
-    //     console.warn('Failed to create thumbnail:', error);
-    //   }
-    // }
+    // 썸네일 생성 (이미지인 경우)
+    if (fileType === 'image') {
+      try {
+        const thumbnailPath = await this.createThumbnail(file.buffer, fileId);
+        metadata.thumbnailPath = thumbnailPath;
+      } catch (error) {
+        console.warn('Failed to create thumbnail:', error);
+      }
+    }
 
     // 메타데이터 저장
     await this.saveMetadata(metadata);
@@ -146,19 +145,18 @@ export class LocalStorageAdapter implements StorageAdapter {
       return fs.readFile(thumbnailFullPath);
     }
 
-    // 썸네일이 없으면 원본에서 생성 - 임시로 비활성화
-    // Temporarily disabled due to Sharp compilation issues
-    // if (metadata.fileType === 'image') {
-    //   const fileBuffer = await this.getFile(id);
-    //   return sharp(fileBuffer)
-    //     .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
-    //       fit: 'cover'
-    //     })
-    //     .jpeg({ quality: 80 })
-    //     .toBuffer();
-    // }
+    // 썸네일이 없으면 원본에서 생성
+    if (metadata.fileType === 'image') {
+      const fileBuffer = await this.getFile(id);
+      return sharp(fileBuffer)
+        .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
+          fit: 'cover'
+        })
+        .jpeg({ quality: 80 })
+        .toBuffer();
+    }
 
-    throw new Error('Thumbnail generation temporarily disabled');
+    throw new Error('Thumbnail not available for this file type');
   }
 
   async getStorageInfo(): Promise<{
@@ -185,22 +183,21 @@ export class LocalStorageAdapter implements StorageAdapter {
     };
   }
 
-  // Temporarily disabled due to Sharp compilation issues
-  // private async createThumbnail(buffer: Buffer, fileId: string): Promise<string> {
-  //   const thumbnailBuffer = await sharp(buffer)
-  //     .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
-  //       fit: 'cover'
-  //     })
-  //     .jpeg({ quality: 80 })
-  //     .toBuffer();
+  private async createThumbnail(buffer: Buffer, fileId: string): Promise<string> {
+    const thumbnailBuffer = await sharp(buffer)
+      .resize(this.config.thumbnailSize.width, this.config.thumbnailSize.height, {
+        fit: 'cover'
+      })
+      .jpeg({ quality: 80 })
+      .toBuffer();
 
-  //   const thumbnailPath = path.join('thumbnails', `${fileId}.jpg`);
-  //   const fullThumbnailPath = path.join(this.config.basePath, thumbnailPath);
+    const thumbnailPath = path.join('thumbnails', `${fileId}.jpg`);
+    const fullThumbnailPath = path.join(this.config.basePath, thumbnailPath);
 
-  //   await fs.writeFile(fullThumbnailPath, thumbnailBuffer);
+    await fs.writeFile(fullThumbnailPath, thumbnailBuffer);
 
-  //   return thumbnailPath;
-  // }
+    return thumbnailPath;
+  }
 
   private getDatePath(date: Date): string {
     const year = date.getFullYear();
