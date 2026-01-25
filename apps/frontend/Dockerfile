@@ -1,42 +1,19 @@
 # 멀티스테이지 빌드를 사용한 React 프론트엔드
-FROM node:20-alpine AS builder
-
-# 빌드 아키텍처 정보
-ARG TARGETARCH
-ARG TARGETOS
+# 빌드 스테이지는 AMD64에서만 실행 (정적 파일은 아키텍처 무관)
+FROM --platform=linux/amd64 node:20-alpine AS builder
 
 WORKDIR /app
-
-# 시스템 패키지 업데이트
-RUN apk add --no-cache python3 make g++ libc6-compat && rm -rf /var/cache/apk/*
-
-# 환경 변수 설정
-ENV PYTHONUNBUFFERED=1
-ENV NODE_ENV=development
-ENV NPM_CONFIG_UPDATE_NOTIFIER=false
-
-# Node 및 npm 버전 확인
-RUN node --version && npm --version
 
 # 패키지 파일들 복사
 COPY package*.json ./
 
-# package.json 내용 확인
-RUN cat package.json
-
-# npm 설정 확인
-RUN npm config list
-
-# 의존성 설치 (Alpine 환경에 최적화)
-RUN if [ -f package-lock.json ]; then npm ci --verbose --no-audit; else npm install --verbose --no-audit; fi
-
-# 캐시 정리
-RUN npm cache clean --force
+# 의존성 설치
+RUN npm install --no-audit
 
 # 소스 코드 복사
 COPY . .
 
-# 프로덕션 빌드
+# 프로덕션 빌드 (정적 HTML/CSS/JS 생성)
 RUN npm run build
 
 # Nginx를 사용한 프로덕션 이미지
