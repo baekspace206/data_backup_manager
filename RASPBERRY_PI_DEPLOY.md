@@ -57,7 +57,7 @@ services:
       DB_DATABASE: savemydata
       STORAGE_PATH: /app/storage
     volumes:
-      - storage_data:/app/storage
+      - "/media/baekjm/TOURO Mobile USB3.0/savemydata:/app/storage"
     ports:
       - "3001:3001"
 
@@ -71,7 +71,6 @@ services:
 
 volumes:
   postgres_data:
-  storage_data:
 EOF
 ```
 
